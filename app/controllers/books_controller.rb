@@ -1,12 +1,19 @@
 class BooksController < ApplicationController
-  before_action :set_book, only: [:show, :edit, :update, :destroy]
+  before_action :set_book, only: [:show, :edit, :update, :destroy, :toggle_availability]
 
   # GET /books
   # GET /books.json
   def index
-    @books = Book.all
+    @books = Book.all.includes(:author, :genre)
   end
 
+  def checked_out 
+    @checked_out = Book.checked_out
+  end
+
+  def checked_in
+    @checked_in = Book.checked_in
+  end
   # GET /books/1
   # GET /books/1.json
   def show
@@ -58,6 +65,16 @@ class BooksController < ApplicationController
     respond_to do |format|
       format.html { redirect_to books_url, notice: 'Book was successfully destroyed.' }
       format.json { head :no_content }
+    end
+  end
+
+  def toggle_availability 
+    if @book.available 
+      @book.update(available: false)
+      redirect_to books_url, notice: 'Book was checked out.'
+    else 
+      @book.update(available: true)
+      redirect_to books_url, notice: 'Book was checked in.'
     end
   end
 
